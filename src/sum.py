@@ -69,7 +69,7 @@ def send_telegram_message(bot_token, chat_id, message):
 
 if __name__ == '__main__':
 
-    TG_BOT_TOKEN = os.getenv("TG_BOT_TOKEN")
+    TG_BOT_TOKEN = os.getenv("TG_BOT_TOKEN")  # 这里用了sanshui tg号机器人发送给yui号
     TG_CHAT_ID = os.getenv("TG_CHAT_ID")
     # Load the Excel file
     output_dir = create_output_directory()  # 区分工作流目录和本地运行目录（本地运行前记得github拉取）
