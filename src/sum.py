@@ -1,6 +1,8 @@
+import os
+
 import pandas as pd  # excel处理库
 from datetime import datetime
-
+from pathlib import Path
 import requests
 
 
@@ -33,9 +35,45 @@ def get_stock_price2(stock_code):
     return current_price
 
 
+# github工作流和本地运行，产生的文件放在不同的目录。（gitignore忽略本地运行的目录的文件；工作流运行产生的文件不忽略，让其自动推送到仓库）
+def create_output_directory():
+    # 检查环境变量以确定当前的运行环境。github工作流产生文件放在workflow_files下
+    if os.getenv('GITHUB_ACTIONS') == 'true':
+        output_dir = 'files/workflow_files/'
+    else:
+        output_dir = 'files/local_files/'
+
+    # 创建目录（如果不存在）
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+
+    return output_dir
+
+
+# 推送tg消息
+def send_telegram_message(bot_token, chat_id, message):
+    if not bot_token or not chat_id:
+        print('没有配置tg机器人，无法推送')
+        return
+    tg_url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
+    data = {
+        "chat_id": chat_id,
+        "text": message
+    }
+    response = requests.post(tg_url, json=data)
+    if response.status_code == 200:
+        print("tg消息推送成功!")
+    else:
+        print("Failed to send tg message. Status code:", response.status_code)
+
+
 if __name__ == '__main__':
+
+    TG_BOT_TOKEN = os.getenv("TG_BOT_TOKEN")
+    TG_CHAT_ID = os.getenv("TG_CHAT_ID")
     # Load the Excel file
-    file_path = 'now_price8.xlsx'
+    output_dir = create_output_directory()  # 区分工作流目录和本地运行目录（本地运行前记得github拉取）
+    file_path = Path(__file__).parent / f"{output_dir}now_price8.xlsx"  # 工作流运行目录Path(__file__).parent ，即src目录
     # todo 默认会将数字格式的字符串（如 002495）识别为数字类型，而数字类型会忽略前导零。为了避免这个问题，需要确保股票代码以字符串形式读取和存储
     df = pd.read_excel(file_path, dtype={'代码': str})  # pandas读取excel，并且代码列，内容读取为str（否则002495会被读取成2495）
     # Show the first few rows to understand its structure
@@ -91,15 +129,17 @@ if __name__ == '__main__':
             for investment_key in excel_to_investment_map[stock]:
                 cost = investment_data[investment_key]["cost"]
                 quantity = investment_data[investment_key]["quantity"]
-                profit_loss = round((now_price - cost) * quantity,2)
+                profit_loss = round((now_price - cost) * quantity, 2)
                 total_profit_loss += profit_loss
-                print(investment_key,now_price, profit_loss)
+                print(investment_key, now_price, profit_loss)
         elif stock in investment_data:
             cost = investment_data[stock]["cost"]
             quantity = investment_data[stock]["quantity"]
             profit_loss = round((now_price - cost) * quantity, 2)
             total_profit_loss += profit_loss
-            print(stock,now_price, profit_loss)
+            print(stock, now_price, profit_loss)
     total_profit_loss = round(total_profit_loss, 2)  # 保留两位数
     current_date = datetime.now().date()
-    print(f'\n如果2025年1月27不调仓，则至{current_date}日，盈亏为：{total_profit_loss}')
+    result = f'\n如果2025年1月27不调仓，则至{current_date}日，盈亏为：{total_profit_loss}'
+    print(result)
+    send_telegram_message(TG_BOT_TOKEN, TG_CHAT_ID, result)

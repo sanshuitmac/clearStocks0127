@@ -5,20 +5,17 @@ on:
     branches:
       - main
   workflow_dispatch:
-  schedule:
-    # IMPORTANT: Set cron job in UTC timezone 。+8才是北京时间，每天10点05分
-    - cron: '05 2,14 * * *'
   watch:
     types: started
 
-#permissions:
-#  contents: write  # 授予 GITHUB_TOKEN 对内容的写入权限，则无需手动setting
+permissions:
+  contents: write  # 授予 GITHUB_TOKEN 对内容的写入权限，则无需手动setting
 
 jobs:
   run-python-script:
     runs-on: ubuntu-latest
     # 定时，或者自己点击star则运行此workflow
-    if: github.event_name == 'schedule' || github.event_name == 'watch' && github.event.repository.owner.id == github.event.sender.id
+    if: github.event_name == 'watch' && github.event.repository.owner.id == github.event.sender.id
     
     steps:
       - uses: actions/checkout@v3
