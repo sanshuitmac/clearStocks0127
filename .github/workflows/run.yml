@@ -34,7 +34,7 @@ jobs:
           TG_CHAT_ID: ${{ secrets.TG_CHAT_ID }}
           PUSHPLUS_KEY: ${{ secrets.PUSHPLUS_KEY }}  # 未用到
 
-        run: python src/QrySnowballWatch.py
+        run: python src/sum.py
 
       - name: Set up Git configuration
         run: |
