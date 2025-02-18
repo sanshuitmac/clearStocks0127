@@ -45,7 +45,7 @@ jobs:
         run: |
           cd src/files/workflow_files
           git add .
-          git commit -m "Add generated JSON files" || echo "No changes to commit"
+          git commit -m "Add generated files" || echo "No changes to commit"
           git push
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # github默认的

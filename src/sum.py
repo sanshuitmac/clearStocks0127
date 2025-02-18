@@ -120,6 +120,7 @@ if __name__ == '__main__':
     total_profit_loss = 0
     profit_loss = 0
     df = pd.read_excel(file_path)  # 需要再次读取，主要读取爬取下来的价格。ps上方价格列表已有，可以单独计算无需读取
+    total_list  = []
     for _, row in df.iterrows():
         stock = row["票"]
         now_price = row["now价格"]
@@ -131,15 +132,19 @@ if __name__ == '__main__':
                 quantity = investment_data[investment_key]["quantity"]
                 profit_loss = round((now_price - cost) * quantity, 2)
                 total_profit_loss += profit_loss
-                print(investment_key, now_price, profit_loss)
+                # print(investment_key, now_price, profit_loss)
+                total_list.append(f'{investment_key},{now_price},{profit_loss}')
         elif stock in investment_data:
             cost = investment_data[stock]["cost"]
             quantity = investment_data[stock]["quantity"]
             profit_loss = round((now_price - cost) * quantity, 2)
             total_profit_loss += profit_loss
-            print(stock, now_price, profit_loss)
+            # print(stock, now_price, profit_loss)
+            total_list.append(f'{stock},{now_price},{profit_loss}')
+    print(total_list)
     total_profit_loss = round(total_profit_loss, 2)  # 保留两位数
     current_date = datetime.now().date()
-    result = f'\n如果2025年1月27不调仓，则至{current_date}日，盈亏为：{total_profit_loss}'
-    print(result)
-    send_telegram_message(TG_BOT_TOKEN, TG_CHAT_ID, result)
+    msg = f'\n{total_list}。\n如果2025年1月27不调仓，则至{current_date}日，盈亏为：{total_profit_loss}'
+    send_telegram_message(TG_BOT_TOKEN, TG_CHAT_ID, msg)
+    print(f'\n如果2025年1月27不调仓，则至{current_date}日，盈亏为：{total_profit_loss}')
+
