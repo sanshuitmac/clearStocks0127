@@ -1,0 +1,64 @@
+# github actions的yml配置文件
+name: qrySnowballWatch
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+  schedule:
+    # IMPORTANT: Set cron job in UTC timezone 。+8才是北京时间，每天10点05分
+    - cron: '05 2,14 * * *'
+  watch:
+    types: started
+
+#permissions:
+#  contents: write  # 授予 GITHUB_TOKEN 对内容的写入权限，则无需手动setting
+
+jobs:
+  run-python-script:
+    runs-on: ubuntu-latest
+    # 定时，或者自己点击star则运行此workflow
+    if: github.event_name == 'schedule' || github.event_name == 'watch' && github.event.repository.owner.id == github.event.sender.id
+    
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v3
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: start run
+        env:
+          XQ_A_TOKEN: ${{ secrets.XQ_A_TOKEN }}
+          XQ_U: ${{ secrets.XQ_U }}
+          TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
+          TG_CHAT_ID: ${{ secrets.TG_CHAT_ID }}
+          PUSHPLUS_KEY: ${{ secrets.PUSHPLUS_KEY }}  # 未用到
+
+        run: python src/QrySnowballWatch.py
+
+      - name: Set up Git configuration
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+
+      - name: Commit and push changes
+        run: |
+          cd src/files/workflow_files
+          git add .
+          git commit -m "Add generated JSON files" || echo "No changes to commit"
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # github默认的
+         # GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}  # 自己的PAT
+
+        # GitHub Actions 默认使用 actions/checkout@v3 时，会自动配置 GITHUB_TOKEN，可直接推送到同一仓库，无需额外 Token。但要确保：
+        #GitHub Actions 运行在 main 分支（或你设定的分支）。
+        #GitHub Actions 具有推送权限（默认对 main 分支可能是受限的，可检查仓库的 “Branch Protection Rules”）。
+        #如果推送失败，可能需要 在 Settings -> Actions -> General 里启用 “Read and Write permissions”。
+
+
+        
+
