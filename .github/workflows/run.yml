@@ -1,5 +1,5 @@
 # github actions的yml配置文件
-name: qrySnowballWatch
+name: clearStockEarn
 on:
   push:
     branches:
