@@ -80,7 +80,7 @@ if __name__ == '__main__':
     df.head()
     # qingcang价格： 计算调仓是否正确
     investment_data = {
-        "byd": {"cost": 277.6, "quantity": 300},
+        "byd": {"cost": 92.53, "quantity": 900},  # 25.7.28 笛子拆股1拆3
         "ht": {"cost": 6.86, "quantity": 57400},
         "hy": {"cost": 13.87, "quantity": 11740},
         "hj": {"cost": 17.18, "quantity": 2300},
