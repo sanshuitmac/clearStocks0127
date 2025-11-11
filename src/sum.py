@@ -11,7 +11,7 @@ def get_stock_price2(stock_code):
         market_prefix = "sh"  # 沪市
     elif stock_code.startswith(('0', '3')):
         market_prefix = "sz"  # 深市
-    elif stock_code.startswith('8'):
+    elif stock_code.startswith('9'):
         market_prefix = "bj"  # 北交所
     else:
         print(f"未知股票代码格式: {stock_code}")
